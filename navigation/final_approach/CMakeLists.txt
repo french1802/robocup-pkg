@@ -23,6 +23,7 @@ find_package(catkin REQUIRED COMPONENTS
 	common_utils
 	tf2
 	std_msgs
+	tf
 )
 
 # Use clang++-3.6 if available

@@ -24,6 +24,7 @@
 #include <visualization_msgs/Marker.h>
 #include <geometry_msgs/Twist.h>
 #include <std_msgs/Float32.h>
+#include <tf/transform_listener.h>
 
 #include <final_approach_msg/FinalApproachingAction.h>
 #include <final_approach_msg/plotDataFA.h>
@@ -118,6 +119,9 @@ class FinalApproaching
 
 	// Subscriber
 	ros::Subscriber m_control;
+
+	// Listener
+	tf::TransformListener m_tfListener;
 
 	int m_type;
 	int m_side;

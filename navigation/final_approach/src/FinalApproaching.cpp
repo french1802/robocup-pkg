@@ -303,6 +303,62 @@ void FinalApproaching::executeCB(const final_approach_msg::FinalApproachingGoalC
 			&& m_parameter != final_approach_msg::FinalApproachingGoal::LIGHT
 			&& !m_skipAsservLaser())
 	{
+
+		arTag_t target;
+		if (at.hasArTags())
+		{
+			target = at.getArTags()[0];
+		}
+		else
+		{
+			ros::spinOnce();
+			loopRate.sleep();
+			continue;
+		}
+		ros::Time tfTime = ros::Time::now();
+		geometry_msgs::PoseStamped outPose;
+		std::string errMsg;
+		std::string tf_prefix;
+		m_nh.param<std::string>("simuRobotNamespace", tf_prefix, "");
+		if (tf_prefix.size() != 0)
+			tf_prefix += "/";
+		tf::StampedTransform transform;
+
+		ROS_DEBUG_STREAM_NAMED("tf", "Frame: "<<target.poseStamped.header.frame_id);
+
+		if (!m_tfListener.waitForTransform(tf_prefix+"gripper_link", target.poseStamped.header.frame_id
+											, tfTime, ros::Duration(0.5), ros::Duration(0.01), &errMsg))
+		{
+			ROS_ERROR_STREAM("TF waitForTransform Error: "<<errMsg);
+			ros::spinOnce();
+			loopRate.sleep();
+			continue;
+		}
+
+		try
+		{
+			m_tfListener.transformPose(tf_prefix+"gripper_link", tfTime, target.poseStamped
+										, target.poseStamped.header.frame_id, outPose);
+		}
+		catch (tf::TransformException ex)
+		{
+			ROS_ERROR_STREAM("TF transformPose Error: "<<ex.what());
+		}
+
+		ROS_DEBUG_STREAM_NAMED("tf", "Frame: "<<target.poseStamped.header.frame_id<<" "
+								<<target.poseStamped.pose.position.x<<" "
+								<<target.poseStamped.pose.position.y<<" "
+								<<target.poseStamped.pose.position.z);
+		ROS_DEBUG_STREAM_NAMED("tf", "Frame: "<<outPose.header.frame_id<<" "
+								<<outPose.pose.position.x<<" "
+								<<outPose.pose.position.y<<" "
+								<<outPose.pose.position.z);
+
+
+
+
+
+
 		ROS_INFO_COND(firstTimeInLoop, "LaserScan Asservissement - process");
 		firstTimeInLoop = false;
 		m_feedback.errorX = 0;
@@ -1050,8 +1106,8 @@ bool FinalApproaching::asservissementCameraNew(const arTag_t &target)
 	static int ySuccessJar = jarResetValue;
 	static int yawSuccessJar = jarResetValue;
 
-	float errX = target.pose.position.z - 0.50;  // A corriger une fois les transformations appliquée
-	float errY = -target.pose.position.x;  // A corriger une fois les transformations appliquée
+	float errX = target.poseStamped.pose.position.z - 0.50;  // A corriger une fois les transformations appliquée
+	float errY = -target.poseStamped.pose.position.x;  // A corriger une fois les transformations appliquée
 	float errYaw = target.yaw;  // A corriger une fois les transformations appliquée
 
 	m_feedback.errorX = errX;

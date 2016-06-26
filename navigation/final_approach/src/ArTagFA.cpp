@@ -68,7 +68,9 @@ void ArTagFA::artagCallback(const ar_track_alvar_msgs::AlvarMarkers::ConstPtr& m
 				arTag.id = msg->markers[i].id;
 				arTag.distance = dist;
 				arTag.yaw = -pitch; // XXX: C'est évidemment faux, mais l'absence de transformation amène à ça, à changer
-				arTag.pose = msg->markers[i].pose.pose;
+				arTag.poseStamped = msg->markers[i].pose;
+				arTag.poseStamped.header.stamp = msg->markers[i].header.stamp;
+				arTag.poseStamped.header.frame_id = msg->markers[i].header.frame_id;
 
 				m_arTags.push_back(arTag);
 

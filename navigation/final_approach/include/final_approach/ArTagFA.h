@@ -20,7 +20,7 @@
 typedef struct arTag_s
 {
 	int id;
-	geometry_msgs::Pose pose;
+	geometry_msgs::PoseStamped poseStamped;
 	// Les deux champs qui suivent existent par commodité
 	double yaw;
 	float distance;
